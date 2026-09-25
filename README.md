@@ -449,3 +449,19 @@ pytest tests/test_sandbox.py -v
 pytest tests/ --cov=core --cov=services --cov=memory --cov-report=term-missing
 ```
 
+---
+
+## Screenshots
+
+### Web Interface
+
+![AutoCodeAI Interface](assets/screenshots/screenshot1.png)
+
+### Agent Execution
+
+![Agent Execution](assets/screenshots/screenshot2.png)
+
+### Test Results
+
+![Test Results](assets/screenshots/screenshot3.png)
+
