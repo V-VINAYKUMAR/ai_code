@@ -1,40 +1,9 @@
-# AutoCodeAI — Multi-Agent Autonomous Coding System v2.0
+#Multi-Agent Autonomous Coding System 
 
 > A production-grade, multi-agent AI coding framework with **parallel execution**, **tool integration**, **flexible LLM support**, sandboxed execution, semantic memory, real-time streaming, and git-native output.
 
 ![System Architecture](assets/Figure1.png)
-*Figure 1: Overview of the multi-agent AI coding framework pipeline.*
-
----
-
-## 🆕 What's New in v2.0
-
-**Major enhancements:**
-
-- **🔧 Tool Integration** — Execute git commands, pip installs, and shell operations directly from agent plans
-- **⚡ Parallel Execution** — Run independent coding tasks concurrently for 3-5x faster completion
-- **🌐 Flexible LLM Support** — Switch between LiteLLM (100+ providers), OpenAI, DeepSeek, or local models (Ollama)
-- **🖥️ Web UI** — Beautiful, modern web interface for task submission and real-time output streaming
-- **📊 Enhanced Planning** — Planner can now create parallel execution groups and tool execution steps
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Agents](#agents)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Reference](#api-reference)
-- [How It Works](#how-it-works)
-- [Running Tests](#running-tests)
-- [Contributing](#contributing)
-- [License](#license)
-
----
+-it-works)
 
 ## Overview
 
