@@ -2,9 +2,12 @@
 api/routes.py — FastAPI routes: REST, SSE, WebSocket, and parallel execution.
 """
 
+import io
 import logging
+import zipfile
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
@@ -46,6 +49,46 @@ async def run_agent(req: TaskRequest):
     orch    = get_orchestrator()
     results = await orch.run(req.task, req.context_files)
     return {"results": results}
+@router.get("/agent/download", summary="Download generated project")
+async def download_project():
+    import io
+    import zipfile
+    from pathlib import Path
+    from fastapi.responses import StreamingResponse
+
+    output_root = Path.cwd() / "generated_project"
+
+    if not output_root.exists():
+        return {"error": "No generated project available. Run the agents first."}
+
+    files = [
+        path for path in output_root.rglob("*")
+        if path.is_file()
+    ]
+
+    if not files:
+        return {"error": "Generated project is empty. Run the agents first."}
+
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(
+        zip_buffer,
+        "w",
+        zipfile.ZIP_DEFLATED
+    ) as zip_file:
+        for file_path in files:
+            archive_name = file_path.relative_to(output_root)
+            zip_file.write(file_path, archive_name)
+
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": "attachment; filename=generated_project.zip"
+        }
+    )
 
 
 # ---------------------------------------------------------------------------

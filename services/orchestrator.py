@@ -43,6 +43,7 @@ class Orchestrator:
         self.memory   = MemoryAgent()
         self.sandbox  = DockerSandbox()
         self.tool_executor = ToolExecutor(cwd=repo_path or ".")
+        self.last_generated_files: dict[str, str] = {}
         self.indexer  = RepoIndexer(repo_path) if repo_path else None
         if self.indexer:
             self.indexer.start_watching()
@@ -94,7 +95,7 @@ class Orchestrator:
         task: str,
         context_files: list[str],
         callback: Callback = None,
-    ) -> list[dict]:
+    ) -> dict:
         await self._notify(callback, "🧠 Retrieving memory …\n")
         memory_context = self.memory.retrieve(task)
 
@@ -212,8 +213,13 @@ class Orchestrator:
         if "PASS" in final_review and latest_code:
             self.memory.store(task, latest_code)
 
+        self.last_generated_files = generated_files
+
         await self._notify(callback, "\n✅ Done.\n")
-        return results
+        return {
+    "results": results,
+    "generated_files": generated_files,
+}
     
     async def _execute_step(
         self,
@@ -257,11 +263,14 @@ class Orchestrator:
             )
 
             # Give the coder awareness of files already generated in this run.
-            generated_context = list(generated_files.values())
+            generated_context = [
+                f"===== GENERATED FILE: {path} =====\n{content}"
+                for path, content in generated_files.items()
+            ]
 
             code = await self._stream_coder(
                 desc,
-                context_files,
+                context_files + generated_context,
                 results,
                 memory_context,
                 existing,
@@ -272,10 +281,19 @@ class Orchestrator:
             # Persist generated code both in memory and on disk.
             if file_path:
                 generated_files[file_path] = code
+                self.last_generated_files = dict(generated_files)
+                print(f"📦 SAVED GENERATED FILES: {list(self.last_generated_files.keys())}")
+
+                # Store generated project files separately from AutoCodeAI itself.
+                output_root = Path.cwd() / "generated_project"
 
                 file = Path(file_path)
-                if not file.is_absolute():
-                    file = Path.cwd() / file
+
+                # Prevent generated files from escaping the generated_project directory.
+                if file.is_absolute() or ".." in file.parts:
+                    raise ValueError(f"Invalid generated file path: {file_path}")
+
+                file = output_root / file
 
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.write_text(code, encoding="utf-8")
@@ -297,9 +315,14 @@ class Orchestrator:
                 if filename.startswith("test_") and filename.endswith(".py")
             }
 
+            # Only use Python source files when preparing tests.
+            # Never combine README.md, requirements.txt, etc. into executable code.
             source_parts = []
             for filename, content in generated_files.items():
-                if not filename.startswith("test_"):
+                if (
+                    filename.endswith(".py")
+                    and not filename.startswith("test_")
+                ):
                     source_parts.append(
                         f"# ===== {filename} =====\n{content}"
                     )
@@ -310,7 +333,7 @@ class Orchestrator:
                 test_filename, test_code = next(iter(generated_test_files.items()))
 
                 stdout, stderr = self.sandbox.run_code(
-                    source_code,
+                    "",
                     test_code,
                     generated_files,
                     test_filename=test_filename,
@@ -357,7 +380,7 @@ class Orchestrator:
             )
 
             stdout, stderr = self.sandbox.run_code(
-                source_code,
+                "",
                 test_code,
                 generated_files
             )

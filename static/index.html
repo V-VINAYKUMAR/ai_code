@@ -122,6 +122,20 @@
             cursor: not-allowed;
             transform: none;
         }
+
+        #downloadBtn {
+            background: linear-gradient(135deg, #8957e5 0%, #a371f7 100%);
+        }
+
+        #downloadBtn:disabled {
+            background: #48404f;
+            color: #b8a9c9;
+            opacity: 0.75;
+        }
+
+        #downloadBtn:not(:disabled):hover {
+            box-shadow: 0 4px 12px rgba(163, 113, 247, 0.4);
+        }
         
         .clear-btn {
             background: linear-gradient(135deg, #da3633 0%, #c93c37 100%);
@@ -288,13 +302,18 @@
             </div>
             
             <div class="button-group">
-                <button onclick="runTask()" id="runBtn">
-                    🚀 Run Agents
-                </button>
-                <button onclick="clearOutput()" class="clear-btn">
-                    🗑️ Clear Output
-                </button>
-            </div>
+    <button onclick="runTask()" id="runBtn">
+        🚀 Run Agents
+    </button>
+
+    <button onclick="downloadProject()" id="downloadBtn" disabled>
+        📥 Download Project
+    </button>
+
+    <button onclick="clearOutput()" class="clear-btn">
+        🗑️ Clear Output
+    </button>
+</div>
         </div>
         
         <div class="output-section">
@@ -316,6 +335,7 @@
         const outputDiv = document.getElementById('output');
         const statusSpan = document.getElementById('status');
         const runBtn = document.getElementById('runBtn');
+const downloadBtn = document.getElementById('downloadBtn');
         
         function setStatus(status, text) {
             statusSpan.className = `status ${status}`;
@@ -381,6 +401,7 @@
                 }
                 
                 setStatus('success', 'Completed');
+        downloadBtn.disabled = false;
             } catch (error) {
                 console.error('Error:', error);
                 outputDiv.innerText += `\n\n❌ Error: ${error.message}`;
@@ -390,7 +411,32 @@
             }
         }
         
-        // Allow Enter+Shift to submit
+        async function downloadProject() {
+    try {
+        const response = await fetch('/api/agent/download');
+
+        if (!response.ok) {
+            throw new Error('No generated project available.');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'generated_project.zip';
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        alert(`Download failed: ${error.message}`);
+    }
+}
+
+// Allow Enter+Shift to submit
         document.getElementById('task').addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.shiftKey) {
                 e.preventDefault();

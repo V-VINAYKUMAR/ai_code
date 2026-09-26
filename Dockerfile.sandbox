@@ -18,6 +18,11 @@ FROM python:3.10-slim
 RUN pip install --no-cache-dir \
         pytest==8.2.0 \
         hypothesis==6.100.1 \
+        fastapi \
+        uvicorn \
+        sqlalchemy \
+        pydantic \
+        httpx \
     && useradd --create-home --shell /usr/sbin/nologin sandboxuser
 
 # Drop root. The container is also started with a memory cap, a PID limit and
