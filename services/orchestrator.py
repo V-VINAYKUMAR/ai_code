@@ -96,6 +96,15 @@ class Orchestrator:
         context_files: list[str],
         callback: Callback = None,
     ) -> dict:
+        # Start every generation with a completely clean generated project.
+        output_root = Path.cwd() / "generated_project"
+
+        if output_root.exists():
+            import shutil
+            shutil.rmtree(output_root)
+
+        output_root.mkdir(parents=True, exist_ok=True)
+
         await self._notify(callback, "🧠 Retrieving memory …\n")
         memory_context = self.memory.retrieve(task)
 
@@ -257,10 +266,9 @@ class Orchestrator:
             file_path = step.get("file", "")
             
             # Prefer generated in-memory file content before reading disk.
-            existing = generated_files.get(
-                file_path,
-                self._get_file_content(file_path)
-            )
+            # Only use files generated during THIS task.
+            # Never read the AutoCodeAI source tree as generated application content.
+            existing = generated_files.get(file_path, "")
 
             # Give the coder awareness of files already generated in this run.
             generated_context = [
