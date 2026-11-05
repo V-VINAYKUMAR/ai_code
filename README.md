@@ -326,6 +326,7 @@ export LOCAL_MODEL=deepseek-coder
 
 ---
 
+
 ## API Reference
 
 ### `POST /api/agent/run`
@@ -453,6 +454,20 @@ When a `file` is specified in a plan step, the Coder receives the existing file 
 
 ---
 
+###  Download Generated Project
+
+- Automatically generates project files based on the user's prompt.
+- Organizes generated files into a structured project directory.
+- Allows users to download the entire generated project as a ZIP archive.
+- Makes it easy to extract, run, and continue developing the generated application locally.
+
+**How it works:**
+1. Enter your project requirements.
+2. AI agents plan and generate the required code files.
+3. The generated files are collected into a project directory.
+4. Click the **Download Project** button to download the complete project as a ZIP file.
+
+
 ## Running Tests
 
 ```bash
@@ -465,37 +480,3 @@ pytest tests/test_sandbox.py -v
 # With coverage
 pytest tests/ --cov=core --cov=services --cov=memory --cov-report=term-missing
 ```
-
----
-
-## Contributing
-
-1. Fork the repo and create a feature branch
-
-```bash
-git checkout -b feature/your-improvement
-```
-
-2. Make changes and add tests
-
-```bash
-pytest tests/ -v
-```
-
-3. Open a pull request — describe what changed and why
-
-Please follow existing code style: async-first, type-annotated, no bare `except` clauses.
-
----
-
-## Citation
-
-If you use this project, please cite:
-
-```bibtex
-@misc{kumar2026AgentForge,
-  title={AgentForge: Execution-Grounded Multi-Agent LLM Framework for Autonomous Software Engineering},
-  author={Rajesh Kumar, Waqar Ali, Junaid Ahmed, Najma Imtiaz Ali, Shaban Usman},
-  year={2026},
-  note={https://arxiv.org/abs/2604.13120}
-}
